@@ -7,6 +7,7 @@ This is a fairly trivial static analysis tool that is built with TypeScript and 
 This particular set of cobbled together functionality is what remained when the dust settled. Many languages and frameworks enter, only one [stack of them] leaves as my old Auntie Entity used to say. Sort of. Not really.
 
 ![image](https://github.com/user-attachments/assets/1fcd77a0-9803-49e8-9f9c-947dd53a64ef)
+
 <sub>Sorry, the position of private dancer is taken. Move along.</sub>
 
 ## Deno? Deyes!
