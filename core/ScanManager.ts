@@ -1,4 +1,4 @@
-import Parser from "npm:tree-sitter";
+import Parser, { type SyntaxNode, type Tree } from "npm:tree-sitter";
 import Node from "npm:tree-sitter-sfapex";
 import ScanRule, { configuration } from "./ScanRule.ts";
 import ScanRuleInspection from "./ScanRuleInspection.ts"
@@ -19,7 +19,7 @@ export default class ScanManager{
         this.ScanTargetSource = sourceCode;
         this.ScanTargetSourceFile = sourceFileName;
         this.ParserInstance = parser;
-        let rawTree: Tree = parser.parse(sourceCode);
+        const rawTree: Tree = parser.parse(sourceCode);
         this.TreeRootNode = rawTree.rootNode;
         this.ScanRuleList = new Array<ScanRule>();
     }
@@ -33,24 +33,27 @@ export default class ScanManager{
      */
     scan(scanRules: Array<ScanRule>): ScanManager{
         if(!this.TotalViolations){
-            this.TotalViolations - new Array<Violation>();
+            this.TotalViolations = new Array<Violation>();
         }
-        for(let rule of scanRules){
+        for(const rule of scanRules){
             const config : configuration = rule.RuleConfiguration;
-            if(config.targetNodeTypeName == "*"){
+            if(config.targetNodeTypeNames.includes("*")){
                 rule.inspect(this.TreeRootNode);
             }
             else{
-                const targetDescendants = this.TreeRootNode.descendantsOfType(config.targetNodeTypeName);
+                const targetDescendants: Array<SyntaxNode> = this.TreeRootNode.descendantsOfType(config.targetNodeTypeNames);
                 rule.inspect(targetDescendants);    
                 this.TotalViolations.concat(rule.Violations);
+                this.TotalViolations.forEach(viol=>{
+                    console.log(viol.SourceFragment);
+                })
             }
         }
         return(this);
     }
 
     render(){
-        
+
     }
 
 

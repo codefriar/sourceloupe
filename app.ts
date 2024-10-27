@@ -1,7 +1,9 @@
+'use strict';
 import Parser from "npm:tree-sitter";
 import TsSfApex from "npm:tree-sitter-sfapex";
 import ScanManager from "./core/ScanManager.ts";
 import VariableNameLengthRule from "./rules/implementation/VariableNameLengthRule.ts";
+import type ScanRule from "./core/ScanRule.ts";
 
 const testSource = `
 public with sharing class SampleThing{
@@ -14,6 +16,15 @@ public with sharing class SampleThing{
         Integer k = 10;
         j = i * 2;
         i = j;
+        i++;
+        i++;
+        i++;
+        i++;
+        i++;
+        i++;
+        i++;
+        i++;
+        i++;
         i++;
         i++;
         i++;
@@ -38,15 +49,15 @@ public with sharing class SampleThing{
  * block is the code after an expression that is usally boxed in by braces
  */
 
-let scanRuleList = [
+let scanRuleList: ScanRule[] = [
     new VariableNameLengthRule()
 ];
 
 
 let parser = new Parser();
 parser.setLanguage(TsSfApex.apex);
-let manager = new ScanManager(testSource,"local",parser);
+const manager = new ScanManager(testSource,"local",parser);
 
 manager.scan(scanRuleList);
 
-//manager.TotalViolations.forEach(v=>console.log(v));
+manager.TotalViolations.forEach(v=>console.log(v.SourceFragment));

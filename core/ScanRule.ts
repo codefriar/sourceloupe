@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import Node from "npm:tree-sitter";
+import Node, { type SyntaxNode } from "npm:tree-sitter";
 import Violation from "./Violation.ts";
 
 
@@ -9,7 +9,7 @@ export default abstract class ScanRule{
     Violations: Array<Violation>;
 
     // base class for rules
-    abstract inspect(whatToScan: Array<Node>):void;
+    abstract inspect(whatToScan: Array<SyntaxNode>):void;
 
     // We'll stick with one for now and expand as needed
     constructor(){
@@ -25,8 +25,7 @@ export default abstract class ScanRule{
     }
 
     addViolation(contextNode: Node){
-        console.log(contextNode);
-        let violation: Violation = new Violation();
+        const violation: Violation = new Violation(contextNode,this);
         violation.BeginningAtPosition = contextNode.startPosition;
         violation.EndingAtPosition = contextNode.endPosition;
         violation.Description = this.RuleConfiguration.description;

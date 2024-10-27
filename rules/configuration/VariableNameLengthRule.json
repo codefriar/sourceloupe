@@ -4,13 +4,13 @@
     "priority":1,
     "enabled":true,
     "targetNodeTypeNames":["identifier"],
-    "parentNodeNames":["variable_declarator","formal_parameter"],
-    "childNodeNames":[],
-    "siblingNodeNames":[],
+    "parentNodeTypeNames":["variable_declarator","formal_parameter"],
+    "childNodeTypeNames":[],
+    "siblingNodeTypeNames":[],
     "regularExpression":"",
     "treeSitterQuery":"",
-    "metadata":{
-        "key1":"value1",
-        "key2":"value2",
-    }
+    "metadata":[
+        {"key1":"value1"},
+        {"key2":"value2"}
+    ]
 }

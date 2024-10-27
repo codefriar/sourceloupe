@@ -26,3 +26,10 @@ So with that it's off to the races. If someone happens to see this, I'm going to
 
 Please ask questions because the only one of us that knows it all isn't you or I, it's the community.
 
+## What's on the Near Horizon
+
+Documentation in the following order (or not):
+* Summary of the various classes and what they do
+* Configuration file formal
+* CLI operation
+* More stuff
