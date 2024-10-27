@@ -2,7 +2,10 @@ import ScanRule from "./ScanRule.ts";
 import Point from "npm:tree-sitter";
 import Node from "npm:tree-sitter-sfapex" ;
 
-
+/**
+ * Violation class
+ * Simple object for providing some structure and behavior to the rule on the subject of parsing
+ */
 export default class Violation{
     Message: string;
     Description: string;
@@ -12,6 +15,12 @@ export default class Violation{
     SourceFragment: string;
     Priority: number;
 
+    /**
+     * constructor(...) Entry point for new objects.
+     * @param node 
+     * @param rule 
+     * @param args 
+     */
     constructor(node: Node, rule: ScanRule,...args: any[]){
         this.Message = rule.RuleConfiguration.message;
         this.Description = rule.RuleConfiguration.description;

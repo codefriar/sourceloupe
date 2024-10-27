@@ -8,7 +8,10 @@ export default class VariableNameLengthRule extends ScanRule{
         let violatingNodes: Array<Node> = whatToScan
             .filter(scannedNode => 
                 scannedNode.text != null && 
-                scannedNode.text.length <= 3 
+                scannedNode.text.length <= 3 &&(
+                    scannedNode.parent.type == "formal_parameter" ||
+                    scannedNode.parent.type == "variable_declarator"
+                )
             );
             
         violatingNodes.forEach(node=>{
