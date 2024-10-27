@@ -3,6 +3,14 @@
     "description":"Variable names should be clear and concise. They should describe their context and utility and maintain uniqueness. Anything under three characters is too short.",
     "priority":1,
     "enabled":true,
-    "targetNodeTypeName":"identifier",
-    "parentNodeNames":["variable_declarator","formal_parameter"]
+    "targetNodeTypeNames":["identifier"],
+    "parentNodeNames":["variable_declarator","formal_parameter"],
+    "childNodeNames":[],
+    "siblingNodeNames":[],
+    "regularExpression":"",
+    "treeSitterQuery":"",
+    "metadata":{
+        "key1":"value1",
+        "key2":"value2",
+    }
 }

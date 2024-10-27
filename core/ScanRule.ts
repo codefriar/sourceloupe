@@ -39,16 +39,16 @@ export default abstract class ScanRule{
 }
 
 export class configuration{
-    targetNodeTypeName: string;
-    parentNodeTypeName: string[];
+    targetNodeTypeNames: string[];
+    parentNodeTypeNames: string[];
     description: string;
     message: string;
     priority: number;
     enabled: boolean;
 
     constructor(){
-        this.targetNodeTypeName = "";
-        this.parentNodeTypeName = [];
+        this.targetNodeTypeNames = [];
+        this.parentNodeTypeNames = [];
         this.description = "";
         this.message = "";
         this.priority = 0;
