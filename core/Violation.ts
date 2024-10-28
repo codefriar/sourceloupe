@@ -14,6 +14,7 @@ export default class Violation{
     EndingAtPosition: Point;
     SourceFragment: string;
     Priority: number;
+    TargetNode: Node;
 
     /**
      * constructor(...) Entry point for new objects.
@@ -25,6 +26,7 @@ export default class Violation{
         this.Message = rule.RuleConfiguration.message;
         this.Description = rule.RuleConfiguration.description;
         this.SourceFragment = node.text;
+        this.TargetNode = node;
         
     }
 
