@@ -32,21 +32,25 @@ export default class ScanManager{
      * 
      */
     scan(scanRules: Array<ScanRule>): ScanManager{
-        if(!this.TotalViolations){
+        if(this.TotalViolations == null){
             this.TotalViolations = new Array<Violation>();
         }
         for(const rule of scanRules){
             const config : configuration = rule.RuleConfiguration;
+            // Glob, run against everything. Good example would be
             if(config.targetNodeTypeNames.includes("*")){
                 rule.inspect(this.TreeRootNode);
             }
             else{
+
                 const targetDescendants: Array<SyntaxNode> = this.TreeRootNode.descendantsOfType(config.targetNodeTypeNames);
                 rule.inspect(targetDescendants);    
-                this.TotalViolations.concat(rule.Violations);
-                this.TotalViolations.forEach(viol=>{
-                    console.log(viol.SourceFragment);
+                rule.Violations.forEach(thisViolation => {
+                    this.TotalViolations.push(thisViolation);
+                    console.log(thisViolation.TargetNode.parent.parent.text);
                 })
+                this.TotalViolations.concat(rule.Violations);
+                console.log(this.TotalViolations.length);
             }
         }
         return(this);

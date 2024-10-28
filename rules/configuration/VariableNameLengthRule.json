@@ -10,7 +10,7 @@
     "regularExpression":"",
     "treeSitterQuery":"",
     "metadata":[
-        {"key1":"value1"},
+        {"mminimum":"value1"},
         {"key2":"value2"}
     ]
 }

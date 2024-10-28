@@ -49,11 +49,15 @@ public with sharing class SampleThing{
  * block is the code after an expression that is usally boxed in by braces
  */
 
+
+// New rules get added here. Ideally this would be in an include or something
+// TODO: Ask why this is giving an error when the rule inherits from ScanRule?!?!?
 let scanRuleList: ScanRule[] = [
-    new VariableNameLengthRule()
+    new VariableNameLengthRule() as ScanRule
 ];
 
 
+// TODO: Figure out a better way to leverage events for loading things dynamically
 let parser = new Parser();
 parser.setLanguage(TsSfApex.apex);
 const manager = new ScanManager(testSource,"local",parser);
