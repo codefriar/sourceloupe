@@ -25,7 +25,9 @@ export default class ScanManager{
     }
 
     dump(contextNode: Node){
-
+        this.TreeRootNode.descendantsOfType("identifier").forEach(desc=>{
+            console.log(`${desc.parent.type}=${desc.parent.text}`);
+        });
     }
     /**
      * begins the scan workflow.  (change to scan unless render = end)

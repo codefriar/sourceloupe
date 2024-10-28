@@ -53,7 +53,8 @@ public with sharing class SampleThing{
 // New rules get added here. Ideally this would be in an include or something
 // TODO: Ask why this is giving an error when the rule inherits from ScanRule?!?!?
 let scanRuleList: ScanRule[] = [
-    new VariableNameLengthRule() as ScanRule
+    new VariableNameLengthRule("VariableNames") as ScanRule,
+    new VariableNameLengthRule("MethodNames") as ScanRule,
 ];
 
 
@@ -62,6 +63,7 @@ let parser = new Parser();
 parser.setLanguage(TsSfApex.apex);
 const manager = new ScanManager(testSource,"local",parser);
 
-manager.scan(scanRuleList);
+manager.dump();
+//manager.scan(scanRuleList);
 
-manager.TotalViolations.forEach(v=>console.log(v.SourceFragment));
+//manager.TotalViolations.forEach(v=>console.log(v.SourceFragment));
