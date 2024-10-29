@@ -2,7 +2,7 @@
 import Parser from "npm:tree-sitter";
 import TsSfApex from "npm:tree-sitter-sfapex";
 import ScanManager from "./core/ScanManager.ts";
-import VariableNameLengthRule from "./rules/implementation/VariableNameLengthRule.ts";
+import VariableNameLengthRule from "./rules/implementation/NameLengthRule.ts";
 import type ScanRule from "./core/ScanRule.ts";
 
 const testSource = `
@@ -53,8 +53,8 @@ public with sharing class SampleThing{
 // New rules get added here. Ideally this would be in an include or something
 // TODO: Ask why this is giving an error when the rule inherits from ScanRule?!?!?
 let scanRuleList: ScanRule[] = [
-    new VariableNameLengthRule("VariableNames") as ScanRule,
-    new VariableNameLengthRule("MethodNames") as ScanRule,
+    new NameLengthRule("VariableNames") as ScanRule,
+    new NameLengthRule("MethodNames") as ScanRule
 ];
 
 
