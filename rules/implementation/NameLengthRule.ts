@@ -1,17 +1,15 @@
 import ScanRule from "../../core/ScanRule.ts";
 import Node from "npm:tree-sitter";
 
-export default class VariableNameLengthRule extends ScanRule{
+export default class NameLengthRule extends ScanRule{
     inspect(whatToScan: Array<Node>,...args: any[]){
         // TODO: Varargs for inspect to support k/v pairs of configurable properties.
         // Approach will be as agnostic as possible to these
         const violatingNodes: Array<Node> = whatToScan
             .filter(scannedNode => 
                 scannedNode.text != null && 
-                scannedNode.text.length <= 3 &&(
-                    scannedNode.parent.type == "formal_parameter" ||
-                    scannedNode.parent.type == "variable_declarator"
-                )
+                scannedNode.text.length <= 3 &&
+                this.RuleConfiguration.parentNodeTypeNames.includes(scannedNode.parent.type)
             );
             
         violatingNodes.forEach(node=>{

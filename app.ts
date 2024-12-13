@@ -2,7 +2,7 @@
 import Parser from "npm:tree-sitter";
 import TsSfApex from "npm:tree-sitter-sfapex";
 import ScanManager from "./core/ScanManager.ts";
-import VariableNameLengthRule from "./rules/implementation/NameLengthRule.ts";
+import NameLengthRule from "./rules/implementation/NameLengthRule.ts";
 import type ScanRule from "./core/ScanRule.ts";
 
 const testSource = `
@@ -63,7 +63,7 @@ let parser = new Parser();
 parser.setLanguage(TsSfApex.apex);
 const manager = new ScanManager(testSource,"local",parser);
 
-manager.dump();
-//manager.scan(scanRuleList);
+manager.dump(manager.TreeRootNode);
+manager.scan(scanRuleList);
 
-//manager.TotalViolations.forEach(v=>console.log(v.SourceFragment));
+manager.TotalViolations.forEach(v=>console.log(v.SourceFragment));
