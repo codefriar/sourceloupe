@@ -63,7 +63,7 @@ let parser = new Parser();
 parser.setLanguage(TsSfApex.apex);
 const manager = new ScanManager(testSource,"local",parser);
 
-manager.dump(manager.TreeRootNode);
+//manager.dump(manager.TreeRootNode);
 manager.scan(scanRuleList);
 
-manager.TotalViolations.forEach(v=>console.log(v.SourceFragment));
+//manager.TotalViolations.forEach(v=>console.log(v.SourceFragment));

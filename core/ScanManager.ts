@@ -55,7 +55,7 @@
                         console.log(thisViolation.TargetNode.parent.parent.text);
                     })
                     this.TotalViolations.concat(rule.Violations);
-                    console.log(this.TotalViolations.length);
+                    //console.log(this.TotalViolations.length);
                 }
             }
             return(this);
