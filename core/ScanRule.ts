@@ -54,3 +54,4 @@ export class configuration{
         this.enabled = false;
     }
 }
+|
