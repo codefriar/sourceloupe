@@ -1,4 +1,4 @@
-import Node from "npm:tree-sitter";
+import Node from "tree-sitter";
 
 export class VariableDeclaration extends Node{
 }

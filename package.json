@@ -1,0 +1,26 @@
+{
+  "name": "sourceloupe",
+  "version": "1.0.0",
+  "description": "Static analysis using TypeScript",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/justinstroudbah/sourceloupe.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/justinstroudbah/sourceloupe/issues"
+  },
+  "homepage": "https://github.com/justinstroudbah/sourceloupe#readme",
+  "dependencies": {
+    "tree-sitter": "^0.21.0",
+    "tree-sitter-sfapex": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2"
+  }
+}
