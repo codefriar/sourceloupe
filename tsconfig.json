@@ -1,2 +1,6 @@
 {
+    "compilerOptions": {
+        "allowImportingTsExtensions": true,
+        "esModuleInterop": true
+    }
 }

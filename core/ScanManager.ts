@@ -1,5 +1,5 @@
-    import Parser, { type SyntaxNode, type Tree } from "npm:tree-sitter";
-    import Node from "npm:tree-sitter-sfapex";
+    import Parser, { type SyntaxNode, type Tree } from "tree-sitter";
+//    import SyntaxNode from "tree-sitter-sfapex";
     import ScanRule, { configuration } from "./ScanRule.ts";
     import ScanRuleInspection from "./ScanRuleInspection.ts"
     import Violation from "./Violation.ts"
@@ -9,7 +9,7 @@
         ScanTargetSourceFile: string;
         TotalViolations: Array<Violation>;
         ParserInstance: Parser;
-        TreeRootNode: Node;
+        TreeRootNode: SyntaxNode;
         ScanRules: Array<ScanRule>;
 
         protected ScanRuleList: Array<ScanRule>;
@@ -24,12 +24,13 @@
             this.ScanRuleList = new Array<ScanRule>();
         }
 
-        dump(contextNode: Node){
+        dump(contextNode: SyntaxNode){
             if(contextNode !== undefined){
                 console.log(`${contextNode.type}=${contextNode.text}`);
             }
             for(let childNode in contextNode.children){
-                this.dump(childNode);
+                console.log(childNode);
+                //this.dump(childNode);
             }
         }
         /**
@@ -44,12 +45,12 @@
                 const config : configuration = rule.RuleConfiguration;
                 // Glob, run against everything. Good example would be
                 if(config.targetNodeTypeNames.includes("*")){
-                    rule.inspect(this.TreeRootNode);
+                    //rule.inspect(this.TreeRootNode);
                 }
                 else{
 
-                    const targetDescendants: Array<SyntaxNode> = this.TreeRootNode.descendantsOfType(config.targetNodeTypeNames);
-                    rule.inspect(targetDescendants);    
+                    // const targetDescendants: Array<SyntaxNode> = this.TreeRootNode.descendantsOfType(config.targetNodeTypeNames);
+                    rule.inspect(this.TreeRootNode.descendantsOfType(config.targetNodeTypeNames));    
                     rule.Violations.forEach(thisViolation => {
                         this.TotalViolations.push(thisViolation);
                         console.log(thisViolation.TargetNode.parent.parent.text);

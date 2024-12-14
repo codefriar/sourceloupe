@@ -1,8 +1,8 @@
 import ScanRule from "../../core/ScanRule.ts";
-import Node from "npm:tree-sitter";
+import Node, { SyntaxNode } from "tree-sitter";
 
 export default class NameLengthRule extends ScanRule{
-    inspect(whatToScan: Array<Node>,...args: any[]){
+    inspect(whatToScan: Array<SyntaxNode>,...args: any[]) : void{
         // TODO: Varargs for inspect to support k/v pairs of configurable properties.
         // Approach will be as agnostic as possible to these
         // const violatingNodes: Array<Node> = whatToScan
@@ -11,7 +11,7 @@ export default class NameLengthRule extends ScanRule{
         //         scannedNode.text.length <= 3 &&
         //         this.RuleConfiguration.parentNodeTypeNames.includes(scannedNode.parent.type)
         //     );
-        const violatingNodes: Array<Node> = whatToScan
+        const violatingNodes: Array<SyntaxNode> = whatToScan
             .filter(scannedNode => 
                 scannedNode.text != null && 
                 scannedNode.text.length > 0 &&
