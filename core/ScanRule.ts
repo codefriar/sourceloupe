@@ -12,11 +12,12 @@ export default abstract class ScanRule{
     abstract inspect(whatToScan: Array<SyntaxNode>,...args: any[]):void;
 
     // We'll stick with one for now and expand as needed
-    constructor(ruleVariantName:string){
+    constructor(ruleVariantName?:string){
         this.Violations = new Array<Violation>();
         let configurationFileName: string= `./rules/configuration/${this.constructor.name}.json`;
         let jsonObject: any = this.readJsonFile(configurationFileName);
-        this.RuleConfiguration = jsonObject[ruleVariantName] as configuration;
+        const variantName : string = ruleVariantName ?? "default";
+        this.RuleConfiguration = jsonObject[variantName] as configuration;
     }
 
     private readJsonFile(path: string) {

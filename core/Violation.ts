@@ -32,10 +32,12 @@ export default class Violation{
 
     protected getFragmentFromSource(fullSource: string){
         // Too bad I can't get cute with vector/matrix math
-        let startindex: number = this.BeginningAtPosition.row * this.BeginningAtPosition.column;
+        let startIndex: number = this.BeginningAtPosition.row * this.BeginningAtPosition.column;
         let endIndex: number = this.EndingAtPosition.row * this.EndingAtPosition.column;
+        console.log('Hello');
+        console.log(startIndex);
 
-        this.SourceFragment = fullSource.substring(startindex,endIndex);
+        this.SourceFragment = fullSource.substring(startIndex,endIndex);
 
     }
 }
