@@ -1,0 +1,16 @@
+{
+    "default": {
+        "description": "System.debug statements are not allowed. Use Logger.error and Logger.info instead",
+        "message": "System.debug statement detected",
+        "enabled": true,
+        "priority": 1,
+        "targetNodeTypeNames": [
+            "identifier"
+        ],
+        "parentNodeTypeNames": [
+            "variable_declarator",
+            "formal_parameter"
+        ],
+        "metadata": []
+    }
+}

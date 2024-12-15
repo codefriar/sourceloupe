@@ -4,6 +4,7 @@ import TsSfApex from "tree-sitter-sfapex";
 import ScanManager from "./core/ScanManager.ts";
 import NameLengthRule from "./rules/implementation/NameLengthRule.ts";
 import type ScanRule from "./core/ScanRule.ts";
+import SystemDebugRule from "./rules/implementation/SystemDebugRule.ts";
 
 const testSource = `
 public with sharing class SampleThing{
@@ -31,6 +32,8 @@ public with sharing class SampleThing{
     }
 
     public Boolean myMethod(Integer someStuff){
+        // TODO: Sys!
+        System.debug('hello');
         if(someStuff < 10){
             return true;
         }
@@ -45,7 +48,7 @@ public with sharing class SampleThing{
 // TODO: Why this is giving an error when the rule inherits from ScanRule?!?!?
 let scanRuleList: ScanRule[] = [
     new NameLengthRule("VariableNames") as ScanRule,
-    new NameLengthRule("MethodNames") as ScanRule
+    new SystemDebugRule("default") as ScanRule
 ];
 
 
@@ -55,6 +58,7 @@ parser.setLanguage(TsSfApex.apex);
 const manager = new ScanManager(testSource,"local",parser);
 
 //manager.dump(manager.TreeRootNode);
-manager.scan(scanRuleList);
+// manager.scan(scanRuleList);
+const resultMap : any = manager.metrics();
 
 //manager.TotalViolations.forEach(v=>console.log(v.SourceFragment));
