@@ -1,44 +1,25 @@
-// import Parser from "tree-sitter";
-// import TsSfApex from "tree-sitter-sfapex";
-// import Language from "tree-sitter";
-// import {SyntaxNode,Tree} from "tree-sitter";
+import { SyntaxNode } from "tree-sitter";
 
-// export class ScanManager{
+export default class NodeRecognizer{
 
-//     RootNode: SyntaxNode;
+    InspectedNode: SyntaxNode;
 
-//     constructor(tree:Tree){
-//         this.RootNode = tree.rootNode;
-//     }
+    constructor(inspectedNode: SyntaxNode){
+        this.InspectedNode = inspectedNode;
+    }
+    isVariable(): boolean{
+        const parentGrammarType = this.InspectedNode.parent.grammarType;
+        const thisGrammarType = this.InspectedNode.grammarType;
+        return thisGrammarType == "identifier" && (
+            parentGrammarType == "variable_declarator" || 
+            parentGrammarType == "formal_parameter"
+        );
+    }
+    isMethod(): boolean{
+        const parentGrammarType = this.InspectedNode.parent.grammarType;
+        const thisGrammarType = this.InspectedNode.grammarType;
+        return thisGrammarType == "identifier" && parentGrammarType.startsWith("method");
+    }
 
-//     private loadRules(){
 
-//     }
-// }
-
-// class ScanRule{
-
-//     TargetNodeType: string;
-//     TreeRootNode: SyntaxNode;
-//     NewNodeList: Array<SyntaxNode>;
-
-//     constructor(targetType: string,treeRootNode: SyntaxNode){
-//         this.TargetNodeType = targetType;
-//         this.TreeRootNode = treeRootNode;
-//         this.NewNodeList = new Array<SyntaxNode>();
-//     }
-
-//     filterByNodeType(nodeTypeName: string){
-//         this.TargetNodeType = nodeTypeName;
-//         this.NewNodeList =  this.TreeRootNode.descendantsOfType(nodeTypeName);
-//     }
-
-//     filterByParent(parentTypeName){
-//         this.NewNodeList = this.NewNodeList.filter( node => node.parent().type == parentTypeName);
-//     }
-
-//     filterByFirstChild(childTypeName: string){
-//         this.NewNodeList = this.NewNodeList.filter( node: SyntaxNode => node == parentTypeName);
-//     }
-
-// }
+}

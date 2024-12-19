@@ -19,7 +19,7 @@ export default class NameLengthRule extends ScanRule{
             );
 
         violatingNodes.forEach(node=>{
-            console.log(node.text);
+            console.log(node.parent.grammarType);
         })
             
         violatingNodes.forEach(node=>{

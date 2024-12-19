@@ -4,10 +4,10 @@ import Node, { SyntaxNode } from "tree-sitter";
 export default class SystemDebugRule extends ScanRule{
     inspect(whatToScan: Array<SyntaxNode>,...args: any[]) : void{
         whatToScan.forEach(node=> {
-            console.log(`PARENT = ${node.parent.type}`);
-            console.log(`NODE = ${node}`);
-            console.log(node.text);
-            console.log(`FIRST CHILD = ${node.childCount}`);
-        })
+            console.log(`GRAMMAR TYPE = ${node.grammarType}`);
+            console.log(`PARENT GRAMMAR TYPE = ${node.parent.grammarType}`);
+            console.log('--------------------');
+        });
+        
     }
 }
