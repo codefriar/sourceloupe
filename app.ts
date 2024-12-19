@@ -5,6 +5,7 @@ import ScanManager from "./core/ScanManager.ts";
 import NameLengthRule from "./rules/implementation/NameLengthRule.ts";
 import type ScanRule from "./core/ScanRule.ts";
 import SystemDebugRule from "./rules/implementation/SystemDebugRule.ts";
+import {Command,Option,Argument} from "commander";
 
 const testSource = `
 public with sharing class SampleThing{
@@ -52,13 +53,40 @@ let scanRuleList: ScanRule[] = [
 ];
 
 
-// TODO: Figure out a better way to leverage events for loading things dynamically
+//manager.TotalViolations.forEach(v=>console.log(v.SourceFragment));
+
 let parser = new Parser();
 parser.setLanguage(TsSfApex.apex);
 const manager = new ScanManager(testSource,"local",parser);
 
-//manager.dump(manager.TreeRootNode);
-manager.scan(scanRuleList);
-const resultMap : any = manager.metrics();
+const program = new Command();
 
-//manager.TotalViolations.forEach(v=>console.log(v.SourceFragment));
+program
+    .name('sourceloupe')
+    .description('CLI for Salesforce static code analysis using tree-sitter')
+    .version('0.0.1')
+const metricsCommand = new Command("metrics");
+const dumpCommand = new Command("dump");
+const scanCommand = new Command("scan");
+const sourceOption = new Option("-s, --source <path>", "Path to the source to be inspected");
+metricsCommand.addOption(sourceOption);
+scanCommand.addOption(sourceOption);
+dumpCommand.addOption(sourceOption);
+program
+    .addCommand(metricsCommand)
+    .addCommand(dumpCommand)
+    .addCommand(scanCommand)
+    .addOption(sourceOption)
+    .parse(process.argv)
+    .action((name, options, command: Command) => {
+        switch(command.name()){
+            case "scan":
+                manager.scan(scanRuleList);
+            case "dump":
+                manager.dump(manager.TreeRootNode);
+            case "netrics":
+                manager.metrics();
+        }
+    });
+
+

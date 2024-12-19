@@ -41,7 +41,7 @@ export default class ScanManager{
 
     private getAllNodes(startingFromNode: SyntaxNode, forNodeTypes: string[] = []){
         this._allNodes.push(startingFromNode);
-        for (let childItem of this.IncludeAnonymousNodes ? node.children : node.namedChildren) {
+        for (let childItem of this.IncludeAnonymousNodes ? startingFromNode.children : startingFromNode.namedChildren) {
             this.getAllNodes(childItem);
         }
     }
