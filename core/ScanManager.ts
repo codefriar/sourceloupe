@@ -2,6 +2,7 @@ import Parser, { Point, type SyntaxNode, type Tree } from "tree-sitter";
 import ScanRule, { configuration } from "./ScanRule.ts";
 import ScanRuleInspection from "./ScanRuleInspection.ts"
 import Violation from "./Violation.ts"
+import NodeRecognizer from "../nodetools/tools.ts";
 
 export default class ScanManager{
     ScanTargetSource: string;
@@ -10,9 +11,12 @@ export default class ScanManager{
     ParserInstance: Parser;
     TreeRootNode: SyntaxNode;
     ScanRules: Array<ScanRule>;
+    IncludeAnonymousNodes: boolean;
+    NodeTypeToInstanceMap: Map<string,SyntaxNode[]>;
+
+    private _allNodes: SyntaxNode[];
 
     protected ScanRuleList: Array<ScanRule>;
-
 
     constructor(sourceCode:string, sourceFileName: string, parser: Parser){
         this.ScanTargetSource = sourceCode;
@@ -23,42 +27,53 @@ export default class ScanManager{
         this.ScanRuleList = new Array<ScanRule>();
     }
 
-    dump(contextNode: SyntaxNode){
-        if(contextNode !== undefined){
-            console.log(`${contextNode.type}=${contextNode.text}`);
-        }
-        for(let childNode in contextNode.children){
-            console.log(childNode);
-            //this.dump(childNode);
+    dump(node: SyntaxNode, indent = 0) {
+        console.log(
+            " ".repeat(indent),
+            (node.isNamed ? "(" : "") + node.type + (node.isNamed ? ")" : "")
+        );
+        this._allNodes.push(node);
+
+        for (let childItem of this.IncludeAnonymousNodes ? node.children : node.namedChildren) {
+            this.dump(childItem, indent + 2);
         }
     }
 
+    private getAllNodes(startingFromNode: SyntaxNode, forNodeTypes: string[] = []){
+        this._allNodes.push(startingFromNode);
+        for (let childItem of this.IncludeAnonymousNodes ? node.children : node.namedChildren) {
+            this.getAllNodes(childItem);
+        }
+    }
 
-    metrics(): Map<string,any>{
+    metrics(): Map<string,SyntaxNode[]>{
 
-        // THIS IS PROTOTYPE CODE AND NOT INDENDED TO BE FINAL. JUST HERE TO FEED THE DISCUSSION
 
-        // Get all variables and methods
-        const variableList = this.TreeRootNode.descendantsOfType("indentofier")
-                .filter(node=>node.parent.type == "variable_declarator" || node.parent.type == "formal_parameter");
+        this.getAllNodes(this.TreeRootNode);
 
-        const shortVariableList = this.TreeRootNode.descendantsOfType("indentofier")
-            .filter(node=>node.parent.type == "variable_declarator" || node.parent.type == "formal_parameter");
+        this._allNodes.forEach(nodeItem=>{
+            const nodeRecog : NodeRecognizer = new NodeRecognizer(nodeItem);
+            if(nodeRecog.isVariable()){
 
-        const methodList = this.TreeRootNode.descendantsOfType("indentofier")
-            .filter(node=>node.parent.type == "variable_declarator" || node.parent.type == "formal_parameter");
+            }
+            else if(nodeRecog.isMethod()){
 
-        // const shortMethodList = this.TreeRootNode.descendantsOfType("indentofier")
-        //     .filter(node=>node.parent.type == "variable_declarator" || node.parent.type == "formal_parameter");
+            }
 
-        const debugStatentList = this.TreeRootNode.descendantsOfType("identifier")
-            .filter(node=>node.text == "debug");
+            if(this.NodeTypeToInstanceMap.has(nodeItem.grammarType)){
+                this.NodeTypeToInstanceMap.get(nodeItem.grammarType).push(nodeItem);
+            }
+            else{
+                let tempArray : SyntaxNode[] = [];
+                tempArray.push(nodeItem);
+                this.NodeTypeToInstanceMap.set(nodeItem.grammarType,tempArray);
+                
+            }
 
-        const result : Map<string,any> = new Map<string,any>();
 
-        result.set("GoodVars", variableList.length);
-        result.set("BadVars",shortVariableList.length);
-        return result;
+        });
+
+        return this.NodeTypeToInstanceMap;
     }
 
     /**
@@ -72,18 +87,19 @@ export default class ScanManager{
         for(const rule of scanRules){
             const config : configuration = rule.RuleConfiguration;
             // Glob, run against everything. Good example would be
-            console.log(`CONFIG=${configurationFileName}`);
+            //console.log(`CONFIG=${configurationFileName}`);
             if(config.targetNodeTypeNames.includes("*")){
-                //rule.inspect(this.TreeRootNode);
+                rule.inspect(this.TreeRootNode.children);
             }
             else{
 
                 // const targetDescendants: Array<SyntaxNode> = this.TreeRootNode.descendantsOfType(config.targetNodeTypeNames);
+                var nodeTypeList : string[] = [];
+                
                 rule.inspect(this.TreeRootNode.descendantsOfType(config.targetNodeTypeNames));    
                 rule.Violations.forEach(thisViolation => {
                     this.TotalViolations.push(thisViolation);
                 })
-                this.TotalViolations.concat(rule.Violations);
             }
         }
         return(this);

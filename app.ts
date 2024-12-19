@@ -35,6 +35,7 @@ public with sharing class SampleThing{
         // TODO: Sys!
         System.debug('hello');
         if(someStuff < 10){
+            i = -1;
             return true;
         }
         return false;
@@ -45,7 +46,6 @@ public with sharing class SampleThing{
 
 
 // New rules get added here. Ideally this would be in an include or something
-// TODO: Why this is giving an error when the rule inherits from ScanRule?!?!?
 let scanRuleList: ScanRule[] = [
     new NameLengthRule("VariableNames") as ScanRule,
     new SystemDebugRule("default") as ScanRule
@@ -58,7 +58,7 @@ parser.setLanguage(TsSfApex.apex);
 const manager = new ScanManager(testSource,"local",parser);
 
 //manager.dump(manager.TreeRootNode);
-// manager.scan(scanRuleList);
+manager.scan(scanRuleList);
 const resultMap : any = manager.metrics();
 
 //manager.TotalViolations.forEach(v=>console.log(v.SourceFragment));
