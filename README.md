@@ -14,7 +14,7 @@ A straightforward TypeScript framework for leveraging tree-sitter and tree-sitte
 This is a work in progress. As such, the API will change as will the purpose of the modules herein.
 
 
-~~
+<strike>
 ## Current Usage
 
 This project uses the `commander` NPM package to manage CLI options and subcommands. The following is a list of current commands. All of them exist, although some may be stubs while development continues.
@@ -30,4 +30,4 @@ This project uses the `commander` NPM package to manage CLI options and subcomma
 `bun app.ts metrics --source [source_code_path]`
 
 > Parse the given source and structure it in a way that makes it easy to extract metrics for later analysis. For example, if you wanted to get all elements within your source code, filter out just the variables, and see what percentage of those identifiers violated the rules defined, this would be your go-to command.
-~~
+</strike>
