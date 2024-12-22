@@ -1,11 +1,16 @@
 'use strict';
+import * as fs from "fs/promises";
+import * as path from "path";
 import Parser from "tree-sitter";
 import TsSfApex from "tree-sitter-sfapex";
-import ScanManager from "./core/ScanManager.ts";
+import ScanManager, { node_counts, per_file_nodes } from "./core/ScanManager.ts";
 import NameLengthRule from "./rules/implementation/NameLengthRule.ts";
 import type ScanRule from "./core/ScanRule.ts";
 import SystemDebugRule from "./rules/implementation/SystemDebugRule.ts";
 import {Command,Option,Argument} from "commander";
+import { readFile } from "fs";
+import { execSync } from "child_process";
+import { sourceMapsEnabled } from "process";
 
 const testSource = `
 public with sharing class SampleThing{
@@ -55,38 +60,36 @@ let scanRuleList: ScanRule[] = [
 
 //manager.TotalViolations.forEach(v=>console.log(v.SourceFragment));
 
-let parser = new Parser();
-parser.setLanguage(TsSfApex.apex);
-const manager = new ScanManager(testSource,"local",parser);
 
-const program = new Command();
+const onWindows = process.platform === `win32`;
 
-program
-    .name('sourceloupe')
-    .description('CLI for Salesforce static code analysis using tree-sitter')
-    .version('0.0.1')
-const metricsCommand = new Command("metrics");
-const dumpCommand = new Command("dump");
-const scanCommand = new Command("scan");
-const sourceOption = new Option("-s, --source <path>", "Path to the source to be inspected");
-metricsCommand.addOption(sourceOption);
-scanCommand.addOption(sourceOption);
-dumpCommand.addOption(sourceOption);
-program
-    .addCommand(metricsCommand)
-    .addCommand(dumpCommand)
-    .addCommand(scanCommand)
-    .addOption(sourceOption)
-    .parse(process.argv)
-    .action((name, options, command: Command) => {
-        switch(command.name()){
-            case "scan":
-                manager.scan(scanRuleList);
-            case "dump":
-                manager.dump(manager.TreeRootNode);
-            case "netrics":
-                manager.metrics();
+const startingFromDirectory = "c:/repos/bah/va/team-3/ff/va-teams/force-app/main/default/classes"; // Replace with your directory path
+
+function getEverything(dir) {
+  const listCommand = onWindows ? `dir /b/o/s "${dir}"` : `find ${dir}`;
+  return execSync(listCommand).toString(`utf-8`).split(/\r?\n/);
+}
+
+const resultReport: node_counts = new node_counts();
+
+var totalCount: number = 0;
+console.log('{ "node_counts": { "per_file_counts": [');
+getEverything(startingFromDirectory).forEach(fileName=>{
+    if(fileName.endsWith('.cls')){
+        fs.readFile(fileName,'utf8')
+            .then(fileContents=>{
+                //console.log(fileContents);
+                let parser = new Parser();
+                parser.setLanguage(TsSfApex.apex);
+                const manager = new ScanManager(fileContents,fileName,parser);
+
+                const fileResult: per_file_nodes = manager.measure(['formal_parameter','variable_declarator']);
+                for(let nodeType of fileResult.source_node_types){
+                    totalCount += nodeType.total_count;
+                }
+                console.log(`${JSON.stringify(fileResult)},`);
+                //resultReport.addFileMetrics(fileResult);
+            });
         }
-    });
-
+});
 
