@@ -15,6 +15,7 @@ export default class ScanManager{
     NodeTypeToInstanceMap: Map<string,SyntaxNode[]>;
 
     private _allNodes: SyntaxNode[];
+    private _nodeCount: Map<string,number>;
 
     protected ScanRuleList: Array<ScanRule>;
 
@@ -25,6 +26,9 @@ export default class ScanManager{
         const rawTree: Tree = parser.parse(sourceCode);
         this.TreeRootNode = rawTree.rootNode;
         this.ScanRuleList = new Array<ScanRule>();
+        this._allNodes = new Array<SyntaxNode>();
+        this._nodeCount = new Map<string,number>();
+
     }
 
     dump(node: SyntaxNode, indent = 0) {
@@ -45,37 +49,6 @@ export default class ScanManager{
             this.getAllNodes(childItem);
         }
     }
-
-    metrics(): Map<string,SyntaxNode[]>{
-
-
-        this.getAllNodes(this.TreeRootNode);
-
-        this._allNodes.forEach(nodeItem=>{
-            const nodeRecog : NodeRecognizer = new NodeRecognizer(nodeItem);
-            if(nodeRecog.isVariable()){
-
-            }
-            else if(nodeRecog.isMethod()){
-
-            }
-
-            if(this.NodeTypeToInstanceMap.has(nodeItem.grammarType)){
-                this.NodeTypeToInstanceMap.get(nodeItem.grammarType).push(nodeItem);
-            }
-            else{
-                let tempArray : SyntaxNode[] = [];
-                tempArray.push(nodeItem);
-                this.NodeTypeToInstanceMap.set(nodeItem.grammarType,tempArray);
-                
-            }
-
-
-        });
-
-        return this.NodeTypeToInstanceMap;
-    }
-
     /**
      * begins the scan workflow.  (change to scan unless render = end)
      * 
@@ -105,34 +78,90 @@ export default class ScanManager{
         return(this);
     }
 
-    render(){
+    measure(targetNodeTypes: string[]): per_file_nodes{
+        this.getAllNodes(this.TreeRootNode);
+        for(let item of this._allNodes){
+            if(!this._nodeCount.has(item.grammarType)){
+                this._nodeCount[item.grammarType] = 0;
+            }
+            this._nodeCount[item.grammarType]++;
+        }
 
+        const myMap = new Map();
+        for (const val of this._allNodes) {
+            if(val.grammarType !== '='){
+                if(targetNodeTypes === undefined || targetNodeTypes.includes(val.grammarType) || targetNodeTypes.length == 0){
+                    if(!myMap.has(val.grammarType)){
+                        myMap.set(val.grammarType,0);            
+                    }
+                    myMap.set(val.grammarType,myMap.get(val.grammarType)+1);
+                }
+
+            }
+        }
+        const countOf = new per_file_nodes(myMap,this.ScanTargetSourceFile);
+        //console.log(JSON.stringify(countOf));
+        return countOf;
     }
-
 
 }
 
-export class ScanResult{
-    SourceFile : string;
-    Violations: Array<Violation>;
-    StartsAt: SourceLocation;
-    End: SourceLocation;
-    SourceText: string;
-    SourcePath:  string;
 
-    constructor(){
-        
-    }
+//-- ALL THIS DOWN HERE FOR JSON...GONNA FIX THAT
 
-}
-
-export class SourceLocation{
-
-    StartLocation: Point;
-    EndLocation: Point;
+export class node_counts{
+    totals_in_project: Map<string,number>;
+    per_file: per_file_nodes[];
     
-    constructor(node: SyntaxNode){
-        this.StartLocation = node.startPosition;
-        this.EndLocation = node.endPosition;
+    constructor(){
+        this.totals_in_project = new Map();
+        this.per_file = [];
+    }
+
+    addFileMetrics(fileMetric: per_file_nodes){
+        this.per_file.push(fileMetric);
+
+        for(let nodeTypeCount of fileMetric.source_node_types){
+            if(!this.totals_in_project.has(nodeTypeCount.node_type_name)){
+                this.totals_in_project.set(nodeTypeCount.node_type_name,0);
+            }
+            this.totals_in_project.set(nodeTypeCount.node_type_name, this.totals_in_project.get(nodeTypeCount.node_type_name) + 1);
+        }
+    }
+
+}
+
+export class per_file_nodes{
+    filename: string;
+    source_node_types: source_node_type[];
+
+    constructor(nodeLookup: Map, whichFile: string){
+        this.source_node_types = [];
+        for(let [key,value] of nodeLookup){
+            let nodeType = new source_node_type(key,value);
+            this.source_node_types.push(nodeType);
+        }
+        this.filename = whichFile;
     }
 }
+
+export class source_node_type{
+    node_type_name: string;
+    total_count: number;
+    //violations: rule_violation[];
+
+    constructor(name: string, count: number){
+        this.node_type_name = name;
+        this.total_count = count;
+    }
+}
+
+// export class rule_violation{
+//     rule_name: string;
+//     violation_count: number;
+
+//     constructor(rule: string, count: number){
+//         this.rule_name = rule;
+//         this.violation_count = count;
+//     }
+// }
