@@ -1,3 +1,12 @@
+```
+ __  __      __  __  ___ 
+/__`/  \|  ||__)/  `|__  
+.__/\__/\__/|  \\__,|___ 
+     __      __  ___     
+|   /  \|  ||__)|__      
+|___\__/\__/|   |___     
+                         
+```
 # sourceloupe
 
 A straightforward TypeScript framework for leveraging tree-sitter and tree-sitter-sfapex as a static analysis tool.
