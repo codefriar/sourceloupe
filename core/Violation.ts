@@ -7,13 +7,7 @@ import Node from "tree-sitter-sfapex" ;
  * Simple object for providing some structure and behavior to the rule on the subject of parsing
  */
 export default class Violation{
-    Message: string;
-    Description: string;
     ScanRuleUsed: ScanRule;
-    BeginningAtPosition: any;
-    EndingAtPosition: any;
-    SourceFragment: string;
-    Priority: number;
     TargetNode: SyntaxNode;
 
     /**
@@ -22,22 +16,9 @@ export default class Violation{
      * @param rule 
      * @param args 
      */
-    constructor(node: SyntaxNode, rule: ScanRule,...args: any[]){
-        this.Message = rule.RuleConfiguration.message;
-        this.Description = rule.RuleConfiguration.description;
-        this.SourceFragment = node.text;
+    constructor(node: SyntaxNode, rule: ScanRule){
         this.TargetNode = node;
-        
+        this.ScanRuleUsed = rule;
     }
 
-    protected getFragmentFromSource(fullSource: string){
-        // Too bad I can't get cute with vector/matrix math
-        let startIndex: number = this.BeginningAtPosition.row * this.BeginningAtPosition.column;
-        let endIndex: number = this.EndingAtPosition.row * this.EndingAtPosition.column;
-        console.log('Hello');
-        console.log(startIndex);
-
-        this.SourceFragment = fullSource.substring(startIndex,endIndex);
-
-    }
 }
