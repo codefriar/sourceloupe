@@ -1,5 +1,7 @@
 import Parser, { Tree, SyntaxNode } from "tree-sitter";
+import * as TreeSitter from "tree-sitter";
 import ViolationAlert from "./ViolationAlert";
+import { MEASUREMENT_RULES } from "../rules/configuration/RuleRegistry";
 
 export default class ScanManager{
 
@@ -15,7 +17,18 @@ export default class ScanManager{
         this.Alerts = [];
     }
 
-    dump(){}
+    dump(parser: Parser, language: any){
+        console.log("DUMP");
+        const tree = parser.parse(this.SourceCode);
+        const q : TreeSitter.Query = new TreeSitter.Query(language,`(class_declaration (modifiers (modifier (inherited_sharing)@mod)))`);
+        const matches: TreeSitter.QueryMatch[] = q.matches(tree.rootNode)
+        q.captures(tree.rootNode);
+        for(let m of matches){
+            for(let c of m.captures){
+                console.log(c.node.text);
+            }
+        }
+    }
     
     scan(parser: Parser, language: any){
         parser.setLanguage(language);
@@ -25,7 +38,7 @@ export default class ScanManager{
             const describingNodes = sourceTree.rootNode.descendantsOfType(ruleConfig.describingNode);
             let nodesToScan: Array<SyntaxNode> = []
             for(let node of describingNodes){
-                if(node.parent.grammarType == r.rootNode){
+                if(node.parent.grammarType == ruleConfig.rootNode){
                     nodesToScan.push(node);
                 }
             }
@@ -46,5 +59,43 @@ export default class ScanManager{
             }
         }
     }
-    measure(){}
+    measure(parser: Parser, language: any){
+        const fileMeasure : FileMeasurements = new FileMeasurements(this.SourcePath);
+        const tree = parser.parse(this.SourceCode);
+        for(let rule of MEASUREMENT_RULES.rules){
+            const measurement = {}
+            measurement[rule.name] = {};
+            for(let ruleQuery of rule.queries){
+                measurement[rule.name][ruleQuery.name] = 0;
+                const query : TreeSitter.Query = new TreeSitter.Query(language,ruleQuery.query);
+                const matches: TreeSitter.QueryMatch[] = query.matches(tree.rootNode);
+                if(ruleQuery.function != null){
+                    for(let match of matches){
+                        for(let capture of match.captures){
+                            let queryFunction = ruleQuery.function
+                            if(queryFunction(capture.node) == false){
+                                measurement[rule.name][ruleQuery.name]++;
+                            }
+                        }
+                    }
+                }
+                else{
+                    measurement[rule.name][ruleQuery.name]= matches.length
+                }
+            }
+            fileMeasure.Measurements.push(measurement);
+        }
+        console.log(JSON.stringify(fileMeasure));
+    }
+}
+
+class FileMeasurements{
+    FilePath: string;
+    Measurements: Array<any>;
+
+    constructor(filePath: string){
+        this.FilePath = filePath;
+        this.Measurements = [];
+
+    }
 }
