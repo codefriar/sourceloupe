@@ -16,51 +16,6 @@ const sampleSource : string = `
 /**
  * @description Example implementation of an extension from the VTC_BaseRepo
  * @author Booz Allen
- *
- * @example
- * public class MyLWCController{
- *  @TestVisible
- *  private static VCR_AccountRepo memoizedAccountRepo;
- *    whitespace change made to test ci
- *
- *    An internally available getter that returns the memoized version if available.
- *    This allows us to only have one instance of the repo at a time
- *
- *  private static VCR_AccountRepo accountRepo {
- *     get {
- *          if (memoizedAccountRepo == null) {
- *                 memoizedAccountRepo = new VCR_AccountRepo();
- *              }
- *            return memoizedAccountRepo;
- *         }
- *     }
- *
- *
- *
- *
- *     @AuraEnabled
- *     public static List<Account> getPersonAccountsForLWC(){
- *         try {
- *             return accountRepo.fetchPersonAccountsWithContactInfo();
- *         } catch (Exception e) {
- *             AuraHandledException except = new AuraHandledException(e.getMessage());
- *
- *             Sets the message so we can check it in  our test classes
- *
- *             except.setMessage(e.getMessage());
- *             throw except;
- *         }
- *     }
- * }
- *
- * Using FetchById with defaultSelectFields
- *  VCR_AccountRepo repo = new VCR_AccountRepo();
- *  List<Account> accounts = repo.fetchById(recordId);
- *
- * Using FetchById with additional fields
- * VCR_AccountRepo repo = new VCR_AccountRepo();
- * Set<String> myAdditionalFields = new Set<String>{'PersonContactId'};
- * List<Account> accs = repo.fetchById(recordId, myAdditionalFields);
  */
 public virtual inherited sharing class VCR_AccountRepo extends VTC_BaseRepo {
     /**
@@ -100,6 +55,7 @@ public virtual inherited sharing class VCR_AccountRepo extends VTC_BaseRepo {
     }
 }
 `;
+const startingFromDirectory = "c:/repos/bah/va/team-3/ff/va-teams/force-app/main/default/classes"; // Replace with your directory path
 
 const program = new Command();
 
@@ -107,52 +63,80 @@ program
     .name("SourceLoupe")
     .description("Static analysis with TypeScript and tree-sitter")
     .version("0.0.1")
-    
 program
-    .command("scan <sourcePath>")
+    .command("scan")
     .description("Scan Apex files in the given source path (recursively.) Apply all rules in order to flag violations.")
-    .action((sourcePath,Command)=>{
-        run("scan", sourcePath);
+    .addArgument(new Argument("sourcePath", "Required. Path to the source being scanned."))
+    .action((sourcePath,command)=>{
+        run('scan', sourcePath);
     });
-
 program
-    .command("dump <sourcePath>")
+    .command("dump")
     .description("Dump the raw syntax tree. Primarily for debugging.")
-    .action((sourcePath,Command)=>{
-        run("dump", sourcePath);
+    .addArgument(new Argument("sourcePath", "Required. Path to the source being scanned."))
+    .action((sourcePath,command)=>{
+        run('dump', sourcePath);
     });
-
 program
-    .command("measure <sourcePath>")
+    .command("measure")
     .description("Get raw data about source code for analysis.")
-    .action((sourcePath,Command)=>{
-        run("measure", sourcePath);
+    .addArgument(new Argument("sourcePath", "Required. Path to te source being scanned."))
+    .action((sourcePath,command)=>{
+        run('measure', sourcePath);
     });
+program
+    .option("-r,--recurse","Recursively walk path.");
+
+    
+
 
 program.parse(process.argv);
 
+const options = program.opts();
+const recurse = program.opts().recurse ?? false;
 function getEverything(dir) {
   const onWindows = process.platform === `win32`;
   const listCommand = onWindows ? `dir /b/o/s "${dir}"` : `find ${dir}`;
   return execSync(listCommand).toString(`utf-8`).split(/\r?\n/);
 }
 
+async function readdirRecursive(dir: string): Promise<string[]> {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    const files: string[] = [];
+  
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory() && recurse) {
+        files.push(...await readdirRecursive(fullPath)); 
+      } else {
+        files.push(fullPath);
+      }
+    }
+  
+    return files;
+}
+
 function run(command: string, path: string){
     // Scan config file to handle limiting, global options
-    const startingFromDirectory = "c:/repos/bah/va/team-3/ff/va-teams/force-app/main/default/classes"; // Replace with your directory path
-    //mgr.measure(parser,TsSfApex.apex);
-    console.log("Dumping....");
-    const allPaths = getEverything(startingFromDirectory);
-    for(let fileName of allPaths){
-        if(fileName.endsWith('.cls')){
-            fs.readFile(fileName,'utf8')
+
+    readdirRecursive(path).then(paths=>{
+        paths.filter(fileName=>fileName.endsWith(".cls")).forEach(filePath=>{
+            fs.readFile(filePath,'utf8')
                 .then(fileContents=>{
                     let parser = new Parser();
                     parser.setLanguage(TsSfApex.apex);
-                    const mgr : ScanManager = new ScanManager(fileName,fileContents,RULE_REGISTRY);
-                    mgr.measure(parser,TsSfApex.apex)
+                    const scanManager : ScanManager = new ScanManager(filePath,fileContents,RULE_REGISTRY);
+                    switch(command){
+                        case "scan":
+                            scanManager.scan(parser,TsSfApex.apex)
+                        case "dump":
+                            scanManager.dump(parser,TsSfApex.apex)
+                        case "measure":
+                            scanManager.measure(parser,TsSfApex.apex)
+                    }
             })
-        }
-    }
+    
+        });
+    })
                 
 }
