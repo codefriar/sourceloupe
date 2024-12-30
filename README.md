@@ -38,3 +38,4 @@ Commands:
   measure <sourcePath>  Get raw data about source code for analysis.
   help [command]        display help for command
 ```
+ 
