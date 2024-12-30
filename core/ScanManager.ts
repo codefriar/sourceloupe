@@ -18,7 +18,6 @@ export default class ScanManager{
     }
 
     dump(parser: Parser, language: any){
-        console.log("DUMP");
         const tree = parser.parse(this.SourceCode);
         const q : TreeSitter.Query = new TreeSitter.Query(language,`(class_declaration (modifiers (modifier (inherited_sharing)@mod)))`);
         const matches: TreeSitter.QueryMatch[] = q.matches(tree.rootNode)
@@ -85,7 +84,7 @@ export default class ScanManager{
             }
             fileMeasure.Measurements.push(measurement);
         }
-        console.log(JSON.stringify(fileMeasure));
+        //console.log(JSON.stringify(fileMeasure));
     }
 }
 
