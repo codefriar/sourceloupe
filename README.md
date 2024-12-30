@@ -22,7 +22,7 @@ The direction is also moving towards a "rule registry." This registry is a seper
 
 ## Current Usage
 ```
-Usage: SourceLoupe [options] [command]
+Usage: bun index.ts [command] [options]
 
 Static analysis with TypeScript and tree-sitter
 
