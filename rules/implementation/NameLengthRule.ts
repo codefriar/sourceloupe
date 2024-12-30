@@ -1,29 +1,19 @@
 import ScanRule from "../../core/ScanRule.ts";
 import Node, { SyntaxNode } from "tree-sitter";
+import Violation from "../../core/Violation.ts";
 
 export default class NameLengthRule extends ScanRule{
-    inspect(whatToScan: Array<SyntaxNode>,...args: any[]) : void{
-        // TODO: Varargs for inspect to support k/v pairs of configurable properties.
-        // Approach will be as agnostic as possible to these
-        // const violatingNodes: Array<Node> = whatToScan
-        //     .filter(scannedNode => 
-        //         scannedNode.text != null && 
-        //         scannedNode.text.length <= 3 &&
-        //         this.RuleConfiguration.parentNodeTypeNames.includes(scannedNode.parent.type)
-        //     );
-        const violatingNodes: Array<SyntaxNode> = whatToScan
-            .filter(scannedNode => 
-                scannedNode.text != null && 
-                scannedNode.text.length > 0 &&
-                this.RuleConfiguration.parentNodeTypeNames.includes(scannedNode.parent.type)
-            );
+    inspect(whatToScan: Array<SyntaxNode>, args: any) : Array<Violation>{
+        const violations: Array<Violation> = [];
+        const minimumLength : number = args["minimumLength"]
 
-        violatingNodes.forEach(node=>{
-            console.log(node.parent.grammarType);
-        })
-            
-        violatingNodes.forEach(node=>{
-            this.addViolation(node);
-        });
+        for(let node of whatToScan){
+            if(node.text.length < minimumLength){
+                const nodeViolationItem: Violation = new Violation(node,this);
+                violations.push(nodeViolationItem);
+            }
+        }
+        return violations;
+
     }
 }
