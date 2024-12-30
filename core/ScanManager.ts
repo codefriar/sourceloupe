@@ -1,138 +1,101 @@
-import Parser, { Point, type SyntaxNode, type Tree } from "tree-sitter";
-import ScanRule, { configuration } from "./ScanRule.ts";
-import ScanRuleInspection from "./ScanRuleInspection.ts"
-import Violation from "./Violation.ts"
-import NodeRecognizer from "../nodetools/tools.ts";
+import Parser, { Tree, SyntaxNode } from "tree-sitter";
+import * as TreeSitter from "tree-sitter";
+import ViolationAlert from "./ViolationAlert";
+import { MEASUREMENT_RULES } from "../rules/configuration/RuleRegistry";
 
 export default class ScanManager{
-    ScanTargetSource: string;
-    ScanTargetSourceFile: string;
-    TotalViolations: Array<Violation>;
-    ParserInstance: Parser;
-    TreeRootNode: SyntaxNode;
-    ScanRules: Array<ScanRule>;
-    IncludeAnonymousNodes: boolean;
-    NodeTypeToInstanceMap: Map<string,SyntaxNode[]>;
 
-    private _allNodes: SyntaxNode[];
+    SourcePath: string;
+    SourceCode: string;
+    RuleRegistry: any;
+    Alerts: Array<ViolationAlert>;
 
-    protected ScanRuleList: Array<ScanRule>;
-
-    constructor(sourceCode:string, sourceFileName: string, parser: Parser){
-        this.ScanTargetSource = sourceCode;
-        this.ScanTargetSourceFile = sourceFileName;
-        this.ParserInstance = parser;
-        const rawTree: Tree = parser.parse(sourceCode);
-        this.TreeRootNode = rawTree.rootNode;
-        this.ScanRuleList = new Array<ScanRule>();
+    constructor(sourcePath: string, sourceCode: string, registry: any){
+        this.SourcePath = sourcePath;
+        this.SourceCode = sourceCode;
+        this.RuleRegistry = registry;
+        this.Alerts = [];
     }
 
-    dump(node: SyntaxNode, indent = 0) {
-        console.log(
-            " ".repeat(indent),
-            (node.isNamed ? "(" : "") + node.type + (node.isNamed ? ")" : "")
-        );
-        this._allNodes.push(node);
-
-        for (let childItem of this.IncludeAnonymousNodes ? node.children : node.namedChildren) {
-            this.dump(childItem, indent + 2);
-        }
-    }
-
-    private getAllNodes(startingFromNode: SyntaxNode, forNodeTypes: string[] = []){
-        this._allNodes.push(startingFromNode);
-        for (let childItem of this.IncludeAnonymousNodes ? startingFromNode.children : startingFromNode.namedChildren) {
-            this.getAllNodes(childItem);
-        }
-    }
-
-    metrics(): Map<string,SyntaxNode[]>{
-
-
-        this.getAllNodes(this.TreeRootNode);
-
-        this._allNodes.forEach(nodeItem=>{
-            const nodeRecog : NodeRecognizer = new NodeRecognizer(nodeItem);
-            if(nodeRecog.isVariable()){
-
-            }
-            else if(nodeRecog.isMethod()){
-
-            }
-
-            if(this.NodeTypeToInstanceMap.has(nodeItem.grammarType)){
-                this.NodeTypeToInstanceMap.get(nodeItem.grammarType).push(nodeItem);
-            }
-            else{
-                let tempArray : SyntaxNode[] = [];
-                tempArray.push(nodeItem);
-                this.NodeTypeToInstanceMap.set(nodeItem.grammarType,tempArray);
-                
-            }
-
-
-        });
-
-        return this.NodeTypeToInstanceMap;
-    }
-
-    /**
-     * begins the scan workflow.  (change to scan unless render = end)
-     * 
-     */
-    scan(scanRules: Array<ScanRule>): ScanManager{
-        if(this.TotalViolations == null){
-            this.TotalViolations = new Array<Violation>();
-        }
-        for(const rule of scanRules){
-            const config : configuration = rule.RuleConfiguration;
-            // Glob, run against everything. Good example would be
-            //console.log(`CONFIG=${configurationFileName}`);
-            if(config.targetNodeTypeNames.includes("*")){
-                rule.inspect(this.TreeRootNode.children);
-            }
-            else{
-
-                // const targetDescendants: Array<SyntaxNode> = this.TreeRootNode.descendantsOfType(config.targetNodeTypeNames);
-                var nodeTypeList : string[] = [];
-                
-                rule.inspect(this.TreeRootNode.descendantsOfType(config.targetNodeTypeNames));    
-                rule.Violations.forEach(thisViolation => {
-                    this.TotalViolations.push(thisViolation);
-                })
+    dump(parser: Parser, language: any){
+        console.log("DUMP");
+        const tree = parser.parse(this.SourceCode);
+        const q : TreeSitter.Query = new TreeSitter.Query(language,`(class_declaration (modifiers (modifier (inherited_sharing)@mod)))`);
+        const matches: TreeSitter.QueryMatch[] = q.matches(tree.rootNode)
+        q.captures(tree.rootNode);
+        for(let m of matches){
+            for(let c of m.captures){
+                console.log(c.node.text);
             }
         }
-        return(this);
     }
-
-    render(){
-
-    }
-
-
-}
-
-export class ScanResult{
-    SourceFile : string;
-    Violations: Array<Violation>;
-    StartsAt: SourceLocation;
-    End: SourceLocation;
-    SourceText: string;
-    SourcePath:  string;
-
-    constructor(){
-        
-    }
-
-}
-
-export class SourceLocation{
-
-    StartLocation: Point;
-    EndLocation: Point;
     
-    constructor(node: SyntaxNode){
-        this.StartLocation = node.startPosition;
-        this.EndLocation = node.endPosition;
+    scan(parser: Parser, language: any){
+        parser.setLanguage(language);
+        const sourceTree: Tree = parser.parse(this.SourceCode)
+        
+        for(let ruleConfig of this.RuleRegistry.rules){
+            const describingNodes = sourceTree.rootNode.descendantsOfType(ruleConfig.describingNode);
+            let nodesToScan: Array<SyntaxNode> = []
+            for(let node of describingNodes){
+                if(node.parent.grammarType == ruleConfig.rootNode){
+                    nodesToScan.push(node);
+                }
+            }
+        
+            if(nodesToScan.length > 0){
+                for(let violation of ruleConfig.instance.inspect(nodesToScan,ruleConfig.arguments)){
+                    const alertItem: ViolationAlert = new ViolationAlert(violation,ruleConfig);
+                    alertItem.StartsAt = violation.TargetNode.startIndex;
+                    alertItem.EndsAt = violation.TargetNode.endIndex;
+                    this.Alerts.push(alertItem);
+
+                }
+            }
+            for(let alertItem of this.Alerts){
+                const startAt = alertItem.ViolationInstance.TargetNode.startIndex;
+                const endAt = alertItem.ViolationInstance.TargetNode.endIndex;
+                console.log(this.SourceCode.substring(startAt,endAt));
+            }
+        }
+    }
+    measure(parser: Parser, language: any){
+        const fileMeasure : FileMeasurements = new FileMeasurements(this.SourcePath);
+        const tree = parser.parse(this.SourceCode);
+        for(let rule of MEASUREMENT_RULES.rules){
+            const measurement = {}
+            measurement[rule.name] = {};
+            for(let ruleQuery of rule.queries){
+                measurement[rule.name][ruleQuery.name] = 0;
+                const query : TreeSitter.Query = new TreeSitter.Query(language,ruleQuery.query);
+                const matches: TreeSitter.QueryMatch[] = query.matches(tree.rootNode);
+                if(ruleQuery.function != null){
+                    for(let match of matches){
+                        for(let capture of match.captures){
+                            let queryFunction = ruleQuery.function
+                            if(queryFunction(capture.node) == false){
+                                measurement[rule.name][ruleQuery.name]++;
+                            }
+                        }
+                    }
+                }
+                else{
+                    measurement[rule.name][ruleQuery.name]= matches.length
+                }
+            }
+            fileMeasure.Measurements.push(measurement);
+        }
+        console.log(JSON.stringify(fileMeasure));
+    }
+}
+
+class FileMeasurements{
+    FilePath: string;
+    Measurements: Array<any>;
+
+    constructor(filePath: string){
+        this.FilePath = filePath;
+        this.Measurements = [];
+
     }
 }
