@@ -55,11 +55,17 @@ export default class ScanManager{
                     }
                 }
                 else{
-                    measurement[rule.name][ruleQuery.name]= matches.length
+                    for( let match of matches){
+                        for(let capture of match.captures){
+                            measurement[rule.name][ruleQuery.name]++;
+                        }
+
+                    }
                 }
             }
             fileMeasure.Measurements.push(measurement);
         }
+        console.log(JSON.stringify(fileMeasure));
     }
 }
 

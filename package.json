@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/justinstroudbah/sourceloupe#readme",
   "dependencies": {
+    "@google/generative-ai": "^0.21.0",
     "tree-sitter": "^0.21.0",
     "tree-sitter-sfapex": "^2.3.0"
   },

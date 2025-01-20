@@ -128,7 +128,7 @@ function run(command: string, path: string, query: string = ""){
         path = startingFromDirectory;
     }
     // Scan config file to handle limiting, global options
-
+    
     readdirRecursive(path).then(paths=>{
         paths.filter(fileName=>fileName.endsWith(".cls")).forEach(filePath=>{
             fs.readFile(filePath,'utf8')

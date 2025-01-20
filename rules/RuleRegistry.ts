@@ -5,27 +5,17 @@ export const RULE_REGISTRY = {
             "name":"Variables",
             "queries":[{
                     "name":"Total",
-                    "query":'(variable_declarator (identifier) @constant)',
+                    "query":'(variable_declarator (identifier) @exp)',
                     "function":null
-                },{
+                },
+                {
                     "name":"Length < 3",
-                    "query":'(variable_declarator (identifier) @exp (#match? @exp "^[a-zA-Z]{0,3}$"))',
-                    "function":null
-                }]
-        },
-        {
-            "name":"Class Declarations",
-            "queries":[{
-                    "name":"Total",
-                    "query":'(class_declaration) @constant',
-                    "function":null
+                    "query":'(variable_declarator (identifier) @exp)',
+                    "function":function(node){return node.text.length > 3;}
+                }
 
-                },{
-                    "name":"No comment header",
-                    "query":'((block_comment) (class_declaration)) @exp',
-                    "function":function(node){return node.text.includes("@description")}
-                }]
-        },
+            ]
+        }
     ]
 }
 
