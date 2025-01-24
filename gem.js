@@ -7,3 +7,4 @@ const prompt = "Give me a tree-sitter query that selects variables with a name s
 
 const result = await model.generateContent(prompt);
 console.log(result.response.text());
+

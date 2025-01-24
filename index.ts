@@ -97,13 +97,25 @@ program
 program.parse(process.argv);
 console.log(program.opts());
 const options = program.opts();
-const recurse = program.opts().recurse ?? false;
+const recurse = program.opts().recurse ?? true;
+
+/**
+ * Experiment in using plain old OS call for directory scanning
+ * @param dir Path we're starting from
+ * @returns Array of file nanes with full path
+ */
 function getEverything(dir) {
   const onWindows = process.platform === `win32`;
   const listCommand = onWindows ? `dir /b/o/s "${dir}"` : `find ${dir}`;
   return execSync(listCommand).toString(`utf-8`).split(/\r?\n/);
 }
 
+
+/**
+ * 
+ * @param dir The directory we are reading
+ * @returns 
+ */
 async function readdirRecursive(dir: string): Promise<string[]> {
     const entries = await fs.readdir(dir, { withFileTypes: true });
     const files: string[] = [];
@@ -116,17 +128,23 @@ async function readdirRecursive(dir: string): Promise<string[]> {
         files.push(fullPath);
       }
     }
-  
     return files;
 }
 
-function _run(command: string, path: string){
+const results : Array<string> = [];
 
-}
+/**
+ * Handles branching based on what command was passed to the scan
+ * @param command Command can be:
+ *  - dump: Just dumps the result of a tree sitter query
+ * @param path Path to the Apex surce you want to scan
+ * @param query Optional treesitter query
+ */
 function run(command: string, path: string, query: string = ""){
     if(path === "test"){
         path = startingFromDirectory;
     }
+
     // Scan config file to handle limiting, global options
     
     readdirRecursive(path).then(paths=>{
@@ -143,10 +161,13 @@ function run(command: string, path: string, query: string = ""){
                             scanManager.dump(parser,TsSfApex.apex,query)
                         case "measure":
                             scanManager.measure(parser,TsSfApex.apex)
+                            results.push(scanManager.MeasureResult);
                     }
-            })
+            }).then(()=>{
+                console.log(`${JSON.stringify(results)}`);
+            });
     
         });
-    })
+    });
                 
 }

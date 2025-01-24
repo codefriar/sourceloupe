@@ -4,9 +4,9 @@
   "description": "Static analysis using TypeScript",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "node -r ts-node/register --env-file=.myenvfile index.ts",
-    "loupe": "bun index.ts"
+    "loupe": "bun index.ts measure c:/repos/bah/va/team-3/ff/va-teams/force-app/main/default/classes"
   },
   "repository": {
     "type": "git",
@@ -19,13 +19,13 @@
   },
   "homepage": "https://github.com/justinstroudbah/sourceloupe#readme",
   "dependencies": {
-    "@google/generative-ai": "^0.21.0",
     "tree-sitter": "^0.21.0",
     "tree-sitter-sfapex": "^2.3.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
     "commander": "^12.1.0",
+    "jest": "^29.7.0",
     "ts-node": "^10.9.2"
   }
 }

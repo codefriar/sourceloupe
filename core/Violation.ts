@@ -7,8 +7,9 @@ import Node from "tree-sitter-sfapex" ;
  * Simple object for providing some structure and behavior to the rule on the subject of parsing
  */
 export default class Violation{
-    ScanRuleUsed: ScanRule;
-    TargetNode: SyntaxNode;
+    RuleQuery: any;
+    SourceSyntaxNode: SyntaxNode;
+    FilePath: string;
 
     /**
      * constructor(...) Entry point for new objects.
@@ -16,9 +17,10 @@ export default class Violation{
      * @param rule 
      * @param args 
      */
-    constructor(node: SyntaxNode, rule: ScanRule){
-        this.TargetNode = node;
-        this.ScanRuleUsed = rule;
+    constructor(node: SyntaxNode, rule: any, ruleQuery: any, filePath: string){
+        this.RuleQuery = ruleQuery;
+        this.FilePath = filePath;
+        this.SourceSyntaxNode = node;
     }
 
 }
