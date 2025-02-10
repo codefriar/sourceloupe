@@ -1,12 +1,9 @@
-import Scanner from '../core/Scanner';
-test('always passes 2', () => {
-    const sourceCode = `
 /**
  * @description This repository is for Case Database Operations
  * @author Booz Allen
  *
  */
-public with sharing class VCR_CaseRepo extends VTC_BaseRepo {
+public with sharing class VCR_CaseRepo extends VTC_Kodebruder {
 
     /**
      * @description Used to set the context for the databasequerylocator in metriclogic and genericbatch
@@ -101,8 +98,4 @@ public with sharing class VCR_CaseRepo extends VTC_BaseRepo {
     interface IMyInf{
     	void getSomething();
     }
-}    
-    `;
-    Scanner.debug('(class_declaration (identifier) @ident)', sourceCode);
-    expect(true).toBe(true);
-});
+}
