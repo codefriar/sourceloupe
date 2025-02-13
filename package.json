@@ -39,7 +39,7 @@
     },
     "homepage": "https://github.com/justinstroudbah/sourceloupe#readme",
     "dependencies": {
-        "sourceloupe-types": "sourceloupe-types",
+        "sourceloupe-types": "^1.0.0",
         "tree-sitter": "^0.22.4",
         "tree-sitter-sfapex": "^2.4.1"
     },
